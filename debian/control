@@ -1,0 +1,42 @@
+Source: nanobind
+Section: python
+Priority: optional
+Maintainer: Debian Python Team <team+python@tracker.debian.org>
+Uploaders:
+ Timo Röhling <roehling@debian.org>
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake,
+ dh-python,
+ libeigen3-dev <!nocheck>,
+ libpython3-all-dev,
+ python3-all-dev:any,
+ python3-numpy <!nocheck>,
+ python3-pytest <!nocheck>,
+ python3-scipy <!nocheck>,
+ python3-torch <!nocheck>,
+ robin-map-dev <!nocheck>,
+Homepage: https://github.com/wjakob/nanobind
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Vcs-Git: https://salsa.debian.org/python-team/packages/nanobind.git
+Vcs-Browser: https://salsa.debian.org/python-team/packages/nanobind
+Description: Tiny and efficient C++/Python bindings
+ nanobind is a small binding library that exposes C++ types in Python and vice
+ versa. It is reminiscent of Boost.Python and pybind11 and uses near-identical
+ syntax. In contrast to these existing tools, nanobind is more efficient:
+ bindings compile in a shorter amount of time, produce smaller binaries, and
+ have better runtime performance.
+
+Package: nanobind-dev
+Architecture: all
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+ libeigen3-dev,
+ robin-map-dev,
+Description: ${source:Synopsis} (development files)
+ ${source:Extended-Description}
+ .
+ This package installs the development files.
+

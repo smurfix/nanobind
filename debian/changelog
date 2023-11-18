@@ -1,0 +1,5 @@
+nanobind (1.8.0-1) UNRELEASED; urgency=medium
+
+  * Initial release (Closes: #1055829)
+
+ -- Timo Röhling <roehling@debian.org>  Sun, 12 Nov 2023 10:49:36 +0100
