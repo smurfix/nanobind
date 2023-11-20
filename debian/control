@@ -14,7 +14,7 @@ Build-Depends:
  python3-numpy <!nocheck>,
  python3-pytest <!nocheck>,
  python3-scipy <!nocheck>,
- python3-torch <!nocheck>,
+ python3-torch [amd64 arm64 mips64el ppc64el s390x] <!nocheck>,
  robin-map-dev <!nocheck>,
 Homepage: https://github.com/wjakob/nanobind
 Standards-Version: 4.6.2
