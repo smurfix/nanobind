@@ -1,3 +1,9 @@
+nanobind (1.8.0-2) unstable; urgency=medium
+
+  * Depend on pytorch on supported architectures only
+
+ -- Timo Röhling <roehling@debian.org>  Mon, 20 Nov 2023 12:50:30 +0100
+
 nanobind (1.8.0-1) unstable; urgency=medium
 
   * Initial release (Closes: #1055829)
