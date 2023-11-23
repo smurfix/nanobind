@@ -9,6 +9,6 @@ Depends:
  python3-numpy,
  python3-pytest,
  python3-scipy,
- python3-torch,
+ python3-torch [amd64 arm64 mips64el ppc64el s390x],
 Restrictions: allow-stderr
 
