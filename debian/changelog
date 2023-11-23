@@ -1,3 +1,9 @@
+nanobind (1.8.0-3) unstable; urgency=medium
+
+  * Restrict architectures of python3-torch for autopkgtest
+
+ -- Timo Röhling <roehling@debian.org>  Thu, 23 Nov 2023 12:01:44 +0100
+
 nanobind (1.8.0-2) unstable; urgency=medium
 
   * Depend on pytorch on supported architectures only
