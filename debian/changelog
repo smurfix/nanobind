@@ -1,3 +1,9 @@
+nanobind (1.8.0-4) unstable; urgency=medium
+
+  * Remove optional test dependency on python3-torch (Closes: #1061615)
+
+ -- Timo Röhling <roehling@debian.org>  Tue, 30 Jan 2024 10:19:10 +0100
+
 nanobind (1.8.0-3) unstable; urgency=medium
 
   * Restrict architectures of python3-torch for autopkgtest
