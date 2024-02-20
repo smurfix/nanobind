@@ -234,27 +234,39 @@ static void internals_cleanup() {
     /* The memory leak checker is unsupported on PyPy, see
        see https://foss.heptapod.net/pypy/pypy/-/issues/3855 */
 
-    bool leak = false;
+    bool leak = false, print_leak_warnings = internals->print_leak_warnings;
 
     if (!internals->inst_c2p.empty()) {
-        if (internals->print_leak_warnings) {
+        if (print_leak_warnings) {
             fprintf(stderr, "nanobind: leaked %zu instances!\n",
                     internals->inst_c2p.size());
+            #if !defined(Py_LIMITED_API)
+                for (auto [k, v]: internals->inst_c2p) {
+                    PyTypeObject *tp = Py_TYPE(v);
+                    fprintf(stderr, " - leaked instance %p of type \"%s\"\n", k, tp->tp_name);
+                }
+            #endif
         }
         leak = true;
     }
 
     if (!internals->keep_alive.empty()) {
-        if (internals->print_leak_warnings) {
+        if (print_leak_warnings) {
             fprintf(stderr, "nanobind: leaked %zu keep_alive records!\n",
                     internals->keep_alive.size());
         }
         leak = true;
     }
 
+    // Only report function/type leaks if actual nanobind instances were leaked
+#if !defined(NB_ABORT_ON_LEAK)
+    if (!leak)
+        print_leak_warnings = false;
+#endif
+
     if (!internals->type_c2p_slow.empty() ||
         !internals->type_c2p_fast.empty()) {
-        if (internals->print_leak_warnings) {
+        if (print_leak_warnings) {
             fprintf(stderr, "nanobind: leaked %zu types!\n",
                     internals->type_c2p_slow.size());
             int ctr = 0;
@@ -270,7 +282,7 @@ static void internals_cleanup() {
     }
 
     if (!internals->funcs.empty()) {
-        if (internals->print_leak_warnings) {
+        if (print_leak_warnings) {
             fprintf(stderr, "nanobind: leaked %zu functions!\n",
                     internals->funcs.size());
             int ctr = 0;
@@ -291,12 +303,12 @@ static void internals_cleanup() {
         internals = nullptr;
         nb_meta_cache = nullptr;
     } else {
-        if (internals->print_leak_warnings) {
+        if (print_leak_warnings) {
             fprintf(stderr, "nanobind: this is likely caused by a reference "
                             "counting issue in the binding code.\n");
         }
 
-        #if NB_ABORT_ON_LEAK == 1
+        #if defined(NB_ABORT_ON_LEAK)
             abort(); // Extra-strict behavior for the CI server
         #endif
     }

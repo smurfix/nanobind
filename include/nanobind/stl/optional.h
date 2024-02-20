@@ -45,7 +45,7 @@ struct type_caster<std::optional<T>> {
             "type caster was registered to intercept this particular "
             "type, which is not allowed.");
 
-        value = caster.operator cast_t<T>();
+        value.emplace(caster.operator cast_t<T>());
 
         return true;
     }
@@ -70,7 +70,7 @@ template <> struct type_caster<std::nullopt_t> {
         return none().release();
     }
 
-    NB_TYPE_CASTER(std::nullopt_t, const_name("None"));
+    NB_TYPE_CASTER(std::nullopt_t, const_name("None"))
 };
 
 NAMESPACE_END(detail)
