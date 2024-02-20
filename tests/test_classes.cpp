@@ -90,6 +90,10 @@ struct Wrapper {
     std::shared_ptr<Wrapper> value;
 };
 
+struct StructWithWeakrefs : Struct { };
+
+struct StructWithWeakrefsAndDynamicAttrs : Struct { };
+
 int wrapper_tp_traverse(PyObject *self, visitproc visit, void *arg) {
     Wrapper *w = nb::inst_ptr<Wrapper>(self);
 
@@ -500,20 +504,20 @@ NB_MODULE(test_classes_ext, m) {
         Struct s;
         bool rv = nb::try_cast<Struct>(h, s);
         return std::make_pair(rv, std::move(s));
-    });
+    }, nb::arg().none());
 
     m.def("try_cast_2", [](nb::handle h) {
         Struct s;
         Struct &s2 = s;
         bool rv = nb::try_cast<Struct &>(h, s2);
         return std::make_pair(rv, std::move(s2));
-    });
+    }, nb::arg().none());
 
     m.def("try_cast_3", [](nb::handle h) {
         Struct *sp = nullptr;
         bool rv = nb::try_cast<Struct *>(h, sp);
         return std::make_pair(rv, sp);
-    }, nb::rv_policy::none);
+    }, nb::arg().none(), nb::rv_policy::none);
 
     m.def("try_cast_4", [](nb::handle h) {
         int i = 0;
@@ -554,4 +558,11 @@ NB_MODULE(test_classes_ext, m) {
         "get_incrementing_struct_value",
         [](IncrementingStruct &s) { return new Struct(s.i + 100); },
         nb::keep_alive<0, 1>());
+
+    nb::class_<StructWithWeakrefs, Struct>(m, "StructWithWeakrefs", nb::weak_referenceable())
+        .def(nb::init<int>());
+
+    nb::class_<StructWithWeakrefsAndDynamicAttrs, Struct>(m, "StructWithWeakrefsAndDynamicAttrs",
+               nb::weak_referenceable(), nb::dynamic_attr())
+        .def(nb::init<int>());
 }

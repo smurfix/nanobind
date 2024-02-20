@@ -15,13 +15,67 @@ case, both modules must use the same nanobind ABI version, or they will be
 isolated from each other. Releases that don't explicitly mention an ABI version
 below inherit that of the preceding release.
 
-Version 1.9.0 (TBA)
--------------------
+Version 1.9.0 (Feb 18, 2024)
+----------------------------
 
-* Nothing yet
+* Nanobind instances can now be :ref:`made weak-referenceable <weak_refs>` by
+  specifying the :cpp:class:`nb::weak_referenceable <weak_referenceable>` tag
+  in the :cpp:class:`nb::class_\<..\> <class_>` constructor. (PR `#335
+  <https://github.com/wjakob/nanobind/pull/335>`__, commit `fc7709
+  <https://github.com/wjakob/nanobind/commit/fc770930468313e5a69364cfd1bbdab9bc0ab208>`__).
+
+* Added a :cpp:class:`nb::bool_ <bool_>` wrapper type. (PR `#382
+  <https://github.com/wjakob/nanobind/pull/382>`__, commit `90dfba
+  <https://github.com/wjakob/nanobind/commit/90dfbaf4c8c410d819cb9be44a3455898c8c2638>`__).
+
+* Ensure that the GIL is held when releasing :cpp:class:`nb::ndarray
+  <ndarray>`. (issue `#377 <https://github.com/wjakob/nanobind/issues/377>`__,
+  commit `a968e8
+  <https://github.com/wjakob/nanobind/commit/a958e8d966f5af64c84412ca801a405042bbcc0b>`__).
+
+* :cpp:func:`nb::try_cast() <try_cast>` no longer crashes the interpreter when
+  attempting to cast a Python ``None`` to a C++ type that was bound using
+  :cpp:class:`nb::class_<...> <class_>`. Previously this would raise an
+  exception from the cast operator, which would result in a call to
+  ``std::terminate()`` because :cpp:func:`try_cast() <try_cast>` is declared
+  ``noexcept``. (PR `#386 <https://github.com/wjakob/nanobind/pull/386>`__).
+
+* Fixed memory corruption in a PyPy-specific codepath in
+  :cpp:func:`nb::module_::def_submodule() <module_::def_submodule>` (commit
+  `21eaff
+  <https://github.com/wjakob/nanobind/commit/21eaffc263c13a5373546d8957e4152e65b1e8ac>`__).
+
+* Don't implicitly convert complex to non-complex nd-arrays. (issue `#364
+  <https://github.com/wjakob/nanobind/issues/364>`__, commit `ea2569
+  <https://github.com/wjakob/nanobind/commit/ea2569f705b9d12185eea67db399a373d37c75aa>`__).
+
+* Support for non-assignable types in the ``std::optional<T>`` type caster (PR
+  `#358 <https://github.com/wjakob/nanobind/pull/358>`__, commit `9c9b64
+  <https://github.com/wjakob/nanobind/commit/0c9b6489cd3fe8a0a5a858e364983e99b06101ce>`__).
+
+* nanobind no longer assumes that docstrings provided to function binding (of
+  type ``const char *``) have an infinite lifetime and it makes copy. (issue
+  `#393 <https://github.com/wjakob/nanobind/pull/393>`__, commit `b3b6f4
+  <https://github.com/wjakob/nanobind/commit/b3b6f44e55948986e02cdbf67e04d9cdd11c4aa4>`__).
+
+* Don't pass compiler flags if they may be unsupported by the used compiler.
+  This gets NVCC to work out of the box (that said, this change does not
+  elevate NVCC to being an *officially* supported compiler). (issue `#383
+  <https://github.com/wjakob/nanobind/pull/383>`__, commit `a307ea
+  <https://github.com/wjakob/nanobind/commit/a307eacaa9902daa190adc428168cf64007dff9e>`__
+
+* Added a CMake install target to the nanobind build system. (PR `#356
+  <https://github.com/wjakob/nanobind/pull/356>`__, commit `6bde65
+  <https://github.com/wjakob/nanobind/commit/5bde6527dc43535982a36ffa02d41275c5e484d9>`__,
+  commit `978dbb
+  <https://github.com/wjakob/nanobind/commit/978dbb1d6aaeee7530d57cf3e8d558e099a4eec6>`__,
+  commit `f5d8de
+  <https://github.com/wjakob/nanobind/commit/f5d8defc68a5c6a79b0e64de016ee52dde6ea54d>`__).
+
+* Minor fixes and improvements.
 
 Version 1.8.0 (Nov 2, 2023)
--------------------
+---------------------------
 
 * nanobind now considers two C++ ``std::type_info`` instances to be equal when
   their mangled names match. The previously used pointer comparison was fast
@@ -36,10 +90,11 @@ Version 1.8.0 (Nov 2, 2023)
   <https://github.com/wjakob/nanobind/pull/338>`__, commit `ba8c7f
   <https://github.com/wjakob/nanobind/commit/ba8c7fa55f2d0ad748cad1dd4af2b22979ebc46a>`__).
 
-* Added an importer for ``std::nullopt_t`` (PR `#350
+* Added a type caster for ``std::nullopt_t`` (PR `#350
   <https://github.com/wjakob/nanobind/pull/350>`__).
 
-* Added a C++ → Python type caster for ``Eigen::Ref<..>`` (PR `#334
+* Added the missing C++ → Python portion of the type caster for
+  ``Eigen::Ref<..>`` (PR `#334
   <https://github.com/wjakob/nanobind/pull/334>`__).
 
 * Minor fixes and improvements.
@@ -122,14 +177,14 @@ Bugfixes
 
 
 Version 1.6.2 (Oct 3, 2023)
--------------------
+---------------------------
 
 * Added a missing include file used by the new intrusive reference counting
   sample implementation from v1.6.0. (commit `31d115
   <https://github.com/wjakob/nanobind/commit/31d115fce310475fed0f539b9446cc41ba9ff4d4>`__).
 
 Version 1.6.1 (Oct 2, 2023)
--------------------
+---------------------------
 
 * Added missing namespace declaration to the :cpp:class:`ref` intrusive
   reference counting RAII helper class added in version 1.6.0. (commit `3ba352
@@ -137,7 +192,7 @@ Version 1.6.1 (Oct 2, 2023)
 
 
 Version 1.6.0 (Oct 2, 2023)
--------------------
+---------------------------
 
 New features
 ^^^^^^^^^^^^
@@ -156,9 +211,9 @@ New features
      <ndarray-nonstandard>` for details. (commit `49eab2
      <https://github.com/wjakob/nanobind/commit/49eab2845530f84a1f029c5c1c5541ab3c1f9adc>`__).
 
-  3. Shape constraints like :py:class:`nb::shape\<nb::any, nb::any, nb::any\>
+  3. Shape constraints like :cpp:class:`nb::shape\<nb::any, nb::any, nb::any\>
      <shape>` are tedious to write. Now, there is a shorter form:
-     :py:class:`nb::ndim\<3\> <ndim>`. (commit `1350a5
+     :cpp:class:`nb::ndim\<3\> <ndim>`. (commit `1350a5
      <https://github.com/wjakob/nanobind/commit/1350a5e15b28e80ffc2130a779f3b8c559ddb620>`__).
 
   4. Added an explicit constructor that can be used to add or remove ndarray
@@ -424,7 +479,7 @@ Miscellaneous fixes and improvements
 
   * Enum equality comparisons (``==`` and ``!=``) now can only be true
     if both operands have the same enum type, or if one is an enum and
-    the other is an :py:class:`int`. This resolves some confusing
+    the other is an ``int``. This resolves some confusing
     results and ensures that enumerators of different types have a
     distinct identity, which is important if they're being put into
     the same set or used as keys in the same dictionary. All of the

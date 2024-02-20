@@ -684,16 +684,34 @@ def test39_try_cast(clean):
     assert_stats(default_constructed=1, move_constructed=2, copy_assigned=1, destructed=3)
     t.reset()
 
+    rv, s2 = t.try_cast_1(None)
+    assert rv is False and s2 is not s and s2.value() == 5
+    del s2
+    assert_stats(default_constructed=1, move_constructed=2, copy_assigned=0, destructed=3)
+    t.reset()
+
     rv, s2 = t.try_cast_2(s)
     assert rv is True and s2 is not s and s.value() == 123 and s2.value() == 123
     del s2
     assert_stats(default_constructed=1, move_constructed=2, copy_assigned=1, destructed=3)
     t.reset()
 
+    rv, s2 = t.try_cast_2(None)
+    assert rv is False and s2 is not s and s2.value() == 5
+    del s2
+    assert_stats(default_constructed=1, move_constructed=2, copy_assigned=0, destructed=3)
+    t.reset()
+
     rv, s2 = t.try_cast_3(s)
     assert rv is True and s2 is s and s.value() == 123
     del s2
     assert_stats()
+    t.reset()
+
+    rv, s2 = t.try_cast_3(None)
+    assert rv is True and s2 is None
+    del s2
+    assert_stats(default_constructed=0, move_constructed=0, copy_assigned=0, destructed=0)
     t.reset()
 
     rv, s2 = t.try_cast_2(1)
@@ -741,3 +759,25 @@ def test41_implicit_conversion_keep_alive():
     assert d1 == []
     assert d2 == [5]
     assert d3 == [106, 6]
+
+def test42_weak_references():
+    import weakref
+    import gc
+    import time
+    o = t.StructWithWeakrefs(42)
+    w = weakref.ref(o)
+    assert w() is o
+    del o
+    gc.collect()
+    gc.collect()
+    assert w() is None
+
+    p = t.StructWithWeakrefsAndDynamicAttrs(43)
+    p.a_dynamic_attr = 101
+    w = weakref.ref(p)
+    assert w() is p
+    assert w().a_dynamic_attr == 101
+    del p
+    gc.collect()
+    gc.collect()
+    assert w() is None
