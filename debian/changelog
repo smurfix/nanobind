@@ -1,3 +1,10 @@
+nanobind (1.9.0-1) unstable; urgency=medium
+
+  * New upstream version 1.9.0
+  * Drop backported upstream patch
+
+ -- Timo Röhling <roehling@debian.org>  Tue, 20 Feb 2024 20:44:04 +0100
+
 nanobind (1.8.0-4) unstable; urgency=medium
 
   * Remove optional test dependency on python3-torch (Closes: #1061615)
