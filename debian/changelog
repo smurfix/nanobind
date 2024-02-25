@@ -1,3 +1,9 @@
+nanobind (1.9.2-1) unstable; urgency=medium
+
+  * New upstream version 1.9.2
+
+ -- Timo Röhling <roehling@debian.org>  Sun, 25 Feb 2024 22:26:36 +0100
+
 nanobind (1.9.0-1) unstable; urgency=medium
 
   * New upstream version 1.9.0
