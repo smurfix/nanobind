@@ -15,11 +15,12 @@ case, both modules must use the same nanobind ABI version, or they will be
 isolated from each other. Releases that don't explicitly mention an ABI version
 below inherit that of the preceding release.
 
-Version 1.9.0 (Feb 18, 2024)
+
+Version 1.9.1 (Feb 23, 2024)
 ----------------------------
 
 * Nanobind instances can now be :ref:`made weak-referenceable <weak_refs>` by
-  specifying the :cpp:class:`nb::weak_referenceable <weak_referenceable>` tag
+  specifying the :cpp:class:`nb::is_weak_referenceable <is_weak_referenceable>` tag
   in the :cpp:class:`nb::class_\<..\> <class_>` constructor. (PR `#335
   <https://github.com/wjakob/nanobind/pull/335>`__, commit `fc7709
   <https://github.com/wjakob/nanobind/commit/fc770930468313e5a69364cfd1bbdab9bc0ab208>`__).
@@ -72,7 +73,15 @@ Version 1.9.0 (Feb 18, 2024)
   commit `f5d8de
   <https://github.com/wjakob/nanobind/commit/f5d8defc68a5c6a79b0e64de016ee52dde6ea54d>`__).
 
+* ABI version 13.
+
 * Minor fixes and improvements.
+
+Version 1.9.0 (Feb 18, 2024)
+----------------------------
+
+Release withdrawn because of a regression. The changes of this release are
+listed above in the 1.9.1 release notes.
 
 Version 1.8.0 (Nov 2, 2023)
 ---------------------------
