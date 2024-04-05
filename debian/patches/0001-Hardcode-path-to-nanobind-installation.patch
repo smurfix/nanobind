@@ -1,0 +1,26 @@
+From: =?utf-8?q?Timo_R=C3=B6hling?= <roehling@debian.org>
+Date: Sat, 6 Apr 2024 01:20:15 +0200
+Subject: Hardcode path to nanobind installation
+
+---
+ src/__init__.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/__init__.py b/src/__init__.py
+index 1694d37..5dfb826 100644
+--- a/src/__init__.py
++++ b/src/__init__.py
+@@ -6,11 +6,11 @@ if sys.version_info < (3, 8):
+ 
+ def include_dir() -> str:
+     "Return the path to the nanobind include directory"
+-    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "include")
++    return "/usr/share/nanobind/include"
+ 
+ def cmake_dir() -> str:
+     "Return the path to the nanobind CMake module directory."
+-    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "cmake")
++    return "/usr/share/nanobind/cmake"
+ 
+ __version__ = "1.9.2"
+ 

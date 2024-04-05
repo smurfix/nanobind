@@ -6,6 +6,7 @@ Uploaders:
  Timo Röhling <roehling@debian.org>
 Build-Depends:
  debhelper-compat (= 13),
+ dh-sequence-python3,
  cmake,
  dh-python,
  libeigen3-dev <!nocheck>,
@@ -14,6 +15,7 @@ Build-Depends:
  python3-numpy <!nocheck>,
  python3-pytest <!nocheck>,
  python3-scipy <!nocheck>,
+ python3-setuptools,
  robin-map-dev <!nocheck>,
 Homepage: https://github.com/wjakob/nanobind
 Standards-Version: 4.6.2
@@ -38,4 +40,15 @@ Description: ${source:Synopsis} (development files)
  ${source:Extended-Description}
  .
  This package installs the development files.
+
+Package: python3-nanobind
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+ nanobind-dev,
+Description: ${source:Synopsis} (Python 3 module)
+ ${source:Extended-Description}
+ .
+ This package installs the Python 3 module.
 
