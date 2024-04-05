@@ -1,3 +1,9 @@
+nanobind (1.9.2-2) unstable; urgency=medium
+
+  * Ship public nanobind module (Closes: #1067085)
+
+ -- Timo Röhling <roehling@debian.org>  Sat, 06 Apr 2024 01:33:25 +0200
+
 nanobind (1.9.2-1) unstable; urgency=medium
 
   * New upstream version 1.9.2
