@@ -1,3 +1,14 @@
+nanobind (2.0.0-1) unstable; urgency=medium
+
+  * New upstream version 2.0.0
+  * Update patch (no function change)
+  * Bump Standards-Version to 4.7.0
+  * Fix test invocation
+  * Fix ndarray stub reference
+  * Install stubgen.py in /usr/share/nanobind as well
+
+ -- Timo Röhling <roehling@debian.org>  Mon, 27 May 2024 16:46:48 +0200
+
 nanobind (1.9.2-3) unstable; urgency=medium
 
   * Source only upload.
