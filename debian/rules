@@ -4,8 +4,7 @@ NB_TEST := $(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),OFF,ON)
 
 export PYBUILD_SYSTEM = cmake
 export PYBUILD_CONFIGURE_ARGS = -DNB_USE_SUBMODULE_DEPS=OFF -DNB_TEST=$(NB_TEST)
-export PYBUILD_TEST_CUSTOM = 1
-export PYBUILD_TEST_ARGS = cd {build_dir} && PYTHONPATH={build_dir}/tests {interpreter} -m pytest
+export PYBUILD_TEST_ARGS = && {interpreter} -m pytest --ignore=tests {build_dir}/tests
 
 %:
 	dh $@ --buildsystem=pybuild
