@@ -1,0 +1,20 @@
+From: =?utf-8?q?Timo_R=C3=B6hling?= <roehling@debian.org>
+Date: Mon, 27 May 2024 16:38:07 +0200
+Subject: Fix ndarray stub reference
+
+---
+ tests/test_ndarray_ext.pyi.ref | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/tests/test_ndarray_ext.pyi.ref b/tests/test_ndarray_ext.pyi.ref
+index 29a9518..528fd84 100644
+--- a/tests/test_ndarray_ext.pyi.ref
++++ b/tests/test_ndarray_ext.pyi.ref
+@@ -1,6 +1,5 @@
+-from typing import Annotated, overload
+-
+ from numpy.typing import ArrayLike
++from typing import Annotated, overload
+ 
+ 
+ class Cls:

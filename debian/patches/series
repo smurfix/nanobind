@@ -1,1 +1,2 @@
 0001-Hardcode-path-to-nanobind-installation.patch
+0002-Fix-ndarray-stub-reference.patch
