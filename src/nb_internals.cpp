@@ -17,7 +17,7 @@
 
 /// Tracks the ABI of nanobind
 #ifndef NB_INTERNALS_VERSION
-#  define NB_INTERNALS_VERSION 13
+#  define NB_INTERNALS_VERSION 14
 #endif
 
 /// On MSVC, debug and release builds are not ABI-compatible!
@@ -81,6 +81,7 @@ NAMESPACE_BEGIN(detail)
 
 extern PyObject *nb_func_getattro(PyObject *, PyObject *);
 extern PyObject *nb_func_get_doc(PyObject *, void *);
+extern PyObject *nb_func_get_nb_signature(PyObject *, void *);
 extern PyObject *nb_bound_method_getattro(PyObject *, PyObject *);
 extern int nb_func_traverse(PyObject *, visitproc, void *);
 extern int nb_func_clear(PyObject *);
@@ -117,6 +118,7 @@ static PyMemberDef nb_func_members[] = {
 
 static PyGetSetDef nb_func_getset[] = {
     { "__doc__", nb_func_get_doc, nullptr, nullptr, nullptr },
+    { "__nb_signature__", nb_func_get_nb_signature, nullptr, nullptr, nullptr },
     { nullptr, nullptr, nullptr, nullptr, nullptr }
 };
 
@@ -299,6 +301,12 @@ static void internals_cleanup() {
     }
 
     if (!leak) {
+        nb_translator_seq* t = internals->translators.next;
+        while (t) {
+            nb_translator_seq *next = t->next;
+            delete t;
+            t = next;
+        }
         delete internals;
         internals = nullptr;
         nb_meta_cache = nullptr;
@@ -354,6 +362,8 @@ NB_NOINLINE void init(const char *name) {
     p->nb_func = (PyTypeObject *) PyType_FromSpec(&nb_func_spec);
     p->nb_method = (PyTypeObject *) PyType_FromSpec(&nb_method_spec);
     p->nb_bound_method = (PyTypeObject *) PyType_FromSpec(&nb_bound_method_spec);
+    p->keep_alive.min_load_factor(.1f);
+    p->inst_c2p.min_load_factor(.1f);
 
     check(p->nb_module && p->nb_meta && p->nb_type_dict && p->nb_func &&
               p->nb_method && p->nb_bound_method,
@@ -440,9 +450,13 @@ NB_NOINLINE void init(const char *name) {
 
 #if defined(NB_COMPACT_ASSERTIONS)
 NB_NOINLINE void fail_unspecified() noexcept {
-    fail("nanobind: encountered an unrecoverable error condition. Recompile "
-         "using the 'Debug' or 'RelWithDebInfo' modes to obtain further "
-         "information about this problem.");
+    #if defined(NB_COMPACT_ASSERTION_MESSAGE)
+        fail(NB_COMPACT_ASSERTION_MESSAGE);
+    #else
+        fail("nanobind: encountered an unrecoverable error condition. Recompile "
+             "using the 'Debug' or 'RelWithDebInfo' modes to obtain further "
+             "information about this problem.");
+    #endif
 }
 #endif
 

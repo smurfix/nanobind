@@ -262,8 +262,14 @@ static PyObject *dlpack_from_buffer_protocol(PyObject *o, bool ro) {
 
     scoped_pymalloc<int64_t> strides((size_t) view->ndim);
     scoped_pymalloc<int64_t> shape((size_t) view->ndim);
+    const int64_t itemsize = static_cast<int64_t>(view->itemsize);
     for (size_t i = 0; i < (size_t) view->ndim; ++i) {
-        strides[i] = (int64_t) (view->strides[i] / view->itemsize);
+        int64_t stride = view->strides[i] / itemsize;
+        if (stride * itemsize != view->strides[i]) {
+            PyBuffer_Release(view.get());
+            return nullptr;
+        }
+        strides[i] = stride;
         shape[i] = (int64_t) view->shape[i];
     }
 
@@ -285,6 +291,9 @@ static PyObject *dlpack_from_buffer_protocol(PyObject *o, bool ro) {
 }
 
 bool ndarray_check(PyObject *o) noexcept {
+    if (PyObject_HasAttrString(o, "__dlpack__") || PyObject_CheckBuffer(o))
+        return true;
+
     PyTypeObject *tp = Py_TYPE(o);
 
     PyObject *name = nb_type_name((PyObject *) tp);
@@ -294,8 +303,6 @@ bool ndarray_check(PyObject *o) noexcept {
     check(tp_name, "Could not obtain type name! (2)");
 
     bool result =
-        // NumPy
-        strcmp(tp_name, "ndarray") == 0 ||
         // PyTorch
         strcmp(tp_name, "torch.Tensor") == 0 ||
         // XLA
@@ -375,7 +382,7 @@ ndarray_handle *ndarray_import(PyObject *o, const ndarray_req *req,
         if (pass_shape) {
             for (uint32_t i = 0; i < req->ndim; ++i) {
                 if (req->shape[i] != (size_t) t.shape[i] &&
-                    req->shape[i] != nanobind::any) {
+                    req->shape[i] != (size_t) -1) {
                     pass_shape = false;
                     break;
                 }
@@ -412,7 +419,7 @@ ndarray_handle *ndarray_import(PyObject *o, const ndarray_req *req,
             if (!t.strides) {
                 /* The provided tensor does not have a valid strides
                    field, which implies a C-style ordering. */
-                pass_order = req->req_order == 'C';
+                pass_order = req->req_order == 'C' || size == 1;
             } else {
                 for (size_t i = 0; i < (size_t) t.ndim; ++i) {
                     if (t.shape[i] != 1 && strides[i] != t.strides[i]) {
@@ -634,7 +641,7 @@ static void ndarray_capsule_destructor(PyObject *o) {
         PyErr_Clear();
 }
 
-PyObject *ndarray_wrap(ndarray_handle *th, int framework,
+PyObject *ndarray_wrap(ndarray_handle *th, ndarray_framework framework,
                        rv_policy policy, cleanup_list *cleanup) noexcept {
     if (!th)
         return none().release().ptr();
@@ -679,7 +686,7 @@ PyObject *ndarray_wrap(ndarray_handle *th, int framework,
         }
     }
 
-    if ((ndarray_framework) framework == ndarray_framework::numpy) {
+    if (framework == ndarray_framework::numpy) {
         try {
             nb_ndarray *h = PyObject_New(nb_ndarray, nd_ndarray_tp());
             if (!h)
@@ -702,14 +709,13 @@ PyObject *ndarray_wrap(ndarray_handle *th, int framework,
 
     object package;
     try {
-        switch ((ndarray_framework) framework) {
+        switch (framework) {
             case ndarray_framework::none:
                 break;
 
             case ndarray_framework::pytorch:
                 package = module_::import_("torch.utils.dlpack");
                 break;
-
 
             case ndarray_framework::tensorflow:
                 package = module_::import_("tensorflow.experimental.dlpack");
@@ -718,7 +724,6 @@ PyObject *ndarray_wrap(ndarray_handle *th, int framework,
             case ndarray_framework::jax:
                 package = module_::import_("jax.dlpack");
                 break;
-
 
             default:
                 check(false, "nanobind::detail::ndarray_wrap(): unknown "
@@ -732,7 +737,7 @@ PyObject *ndarray_wrap(ndarray_handle *th, int framework,
     }
 
     object o;
-    if (copy && (ndarray_framework) framework == ndarray_framework::none && th->self) {
+    if (copy && framework == ndarray_framework::none && th->self) {
         o = borrow(th->self);
     } else {
         o = steal(PyCapsule_New(th->ndarray, "dltensor",
