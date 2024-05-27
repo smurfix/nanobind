@@ -51,6 +51,7 @@ def test01_metadata():
     assert 'incompatible function arguments' in str(excinfo.value)
 
     a = np.zeros(shape=(3, 4, 5), dtype=np.float64)
+    assert t.get_is_valid(a)
     assert t.get_shape(a) == [3, 4, 5]
     assert t.get_size(a) == 60
     assert t.get_nbytes(a) == 60*8
@@ -65,6 +66,11 @@ def test01_metadata():
     assert not t.check_bool(np.array([1], dtype=np.uint32)) and \
            not t.check_bool(np.array([1], dtype=np.float32)) and \
                t.check_bool(np.array([1], dtype=np.bool_))
+
+    assert not t.get_is_valid(None)
+    assert t.get_size(None) == 0
+    assert t.get_nbytes(None) == 0
+    assert t.get_itemsize(None) == 0
 
 
 def test02_docstr():
@@ -89,6 +95,7 @@ def test03_constrain_dtype():
     t.pass_uint32(a_u32)
     t.pass_float32(a_f32)
     t.pass_complex64(a_cf64)
+    t.pass_complex64_const(a_cf64)
     t.pass_bool(a_bool)
 
     a_f32_const = a_f32.copy()
@@ -324,6 +331,13 @@ def test15_passthrough():
     b = t.passthrough(a)
     assert a is b
 
+    a = None
+    with pytest.raises(TypeError) as excinfo:
+        b = t.passthrough(a)
+    assert 'incompatible function arguments' in str(excinfo.value)
+    b = t.passthrough_arg_none(a)
+    assert a is b
+
 
 @needs_numpy
 def test16_return_numpy():
@@ -557,7 +571,7 @@ def test28_reference_internal():
     assert msg in str(excinfo.value)
 
 @needs_numpy
-def test29_force_contig_pytorch():
+def test29_force_contig_numpy():
     a = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     b = t.make_contig(a)
     assert b is a
@@ -644,3 +658,39 @@ def test_uint32_complex_do_not_convert(variant):
     t.set_item(data, arg)
     data2 = np.array([123, 3.0 + 4.0j])
     assert np.all(data == data2)
+
+@needs_numpy
+def test36_check_generic():
+    class DLPackWrapper:
+        def __init__(self, o):
+            self.o = o
+        def __dlpack__(self):
+            return self.o.__dlpack__()
+
+    arr = DLPackWrapper(np.zeros((1)))
+    assert t.check(arr)
+
+@needs_numpy
+def test37_noninteger_stride():
+    a = np.array([[1, 2, 3, 4, 0, 0], [5, 6, 7, 8, 0, 0]], dtype=np.float32)
+    s = a[:, 0:4]  # slice
+    t.pass_float32(s)
+    assert t.get_stride(s, 0) == 6;
+    assert t.get_stride(s, 1) == 1;
+    v = s.view(np.complex64)
+    t.pass_complex64(v)
+    assert t.get_stride(v, 0) == 3;
+    assert t.get_stride(v, 1) == 1;
+
+    a = np.array([[1, 2, 3, 4, 0], [5, 6, 7, 8, 0]], dtype=np.float32)
+    s = a[:, 0:4]  # slice
+    t.pass_float32(s)
+    assert t.get_stride(s, 0) == 5;
+    assert t.get_stride(s, 1) == 1;
+    v = s.view(np.complex64)
+    with pytest.raises(TypeError) as excinfo:
+        t.pass_complex64(v)
+    assert 'incompatible function arguments' in str(excinfo.value)
+    with pytest.raises(TypeError) as excinfo:
+        t.get_stride(v, 0);
+    assert 'incompatible function arguments' in str(excinfo.value)

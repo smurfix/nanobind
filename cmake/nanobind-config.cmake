@@ -13,20 +13,30 @@ else()
   set(NB_SUFFIX_EXT "${CMAKE_SHARED_MODULE_SUFFIX}")
 endif()
 
-# This was added in CMake 3.17+, also available earlier in scikit-build-core.
-# PyPy sets an invalid SOABI (platform missing), causing older FindPythons to
-# report an incorrect value. Only use it if it looks correct (X-X-X form).
-if(DEFINED Python_SOABI AND "${Python_SOABI}" MATCHES ".+-.+-.+")
-  set(NB_SUFFIX ".${Python_SOABI}${NB_SUFFIX_EXT}")
+# Check if FindPython/scikit-build-core defined a SOABI/SOSABI variable
+if(DEFINED SKBUILD_SOABI)
+  set(NB_SOABI "${SKBUILD_SOABI}")
+elseif(DEFINED Python_SOABI)
+  set(NB_SOABI "${Python_SOABI}")
 endif()
 
-# Python_SOSABI is guaranteed to be available in CMake 3.26+, and it may
-# also be available as part of backported FindPython in scikit-build-core.
-if(DEFINED Python_SOSABI)
-  if(Python_SOSABI STREQUAL "")
+if(DEFINED SKBUILD_SOSABI)
+  set(NB_SOSABI "${SKBUILD_SOSABI}")
+elseif(DEFINED Python_SOSABI)
+  set(NB_SOSABI "${Python_SOSABI}")
+endif()
+
+# PyPy sets an invalid SOABI (platform missing), causing older FindPythons to
+# report an incorrect value. Only use it if it looks correct (X-X-X form).
+if(DEFINED NB_SOABI AND "${NB_SOABI}" MATCHES ".+-.+-.+")
+  set(NB_SUFFIX ".${NB_SOABI}${NB_SUFFIX_EXT}")
+endif()
+
+if(DEFINED NB_SOSABI)
+  if(NB_SOSABI STREQUAL "")
     set(NB_SUFFIX_S "${NB_SUFFIX_EXT}")
   else()
-    set(NB_SUFFIX_S ".${Python_SOSABI}${NB_SUFFIX_EXT}")
+    set(NB_SUFFIX_S ".${NB_SOSABI}${NB_SUFFIX_EXT}")
   endif()
 endif()
 
@@ -122,6 +132,7 @@ function (nanobind_build_library TARGET_NAME)
     ${NB_DIR}/include/nanobind/nb_types.h
     ${NB_DIR}/include/nanobind/ndarray.h
     ${NB_DIR}/include/nanobind/trampoline.h
+    ${NB_DIR}/include/nanobind/typing.h
     ${NB_DIR}/include/nanobind/operators.h
     ${NB_DIR}/include/nanobind/stl/array.h
     ${NB_DIR}/include/nanobind/stl/bind_map.h
@@ -357,4 +368,81 @@ function(nanobind_add_module name)
   endif()
 
   nanobind_set_visibility(${name})
+endfunction()
+
+function (nanobind_add_stub name)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "VERBOSE;INCLUDE_PRIVATE;EXCLUDE_DOCSTRINGS;INSTALL_TIME;EXCLUDE_FROM_ALL" "MODULE;OUTPUT;MARKER_FILE;COMPONENT;PATTERN_FILE" "PYTHON_PATH;DEPENDS")
+
+  if (EXISTS ${NB_DIR}/src/stubgen.py)
+    set(NB_STUBGEN "${NB_DIR}/src/stubgen.py")
+  elseif (EXISTS ${NB_DIR}/stubgen.py)
+    set(NB_STUBGEN "${NB_DIR}/stubgen.py")
+  else()
+    message(FATAL_ERROR "nanobind_add_stub(): could not locate 'stubgen.py'!")
+  endif()
+
+  if (NOT ARG_VERBOSE)
+    list(APPEND NB_STUBGEN_ARGS -q)
+  else()
+    set(NB_STUBGEN_EXTRA USES_TERMINAL)
+  endif()
+
+  if (ARG_INCLUDE_PRIVATE)
+    list(APPEND NB_STUBGEN_ARGS -P)
+  endif()
+
+  if (ARG_EXCLUDE_DOCSTRINGS)
+    list(APPEND NB_STUBGEN_ARGS -D)
+  endif()
+
+  foreach (TMP IN LISTS ARG_PYTHON_PATH)
+    list(APPEND NB_STUBGEN_ARGS -i "${TMP}")
+  endforeach()
+
+  if (ARG_PATTERN_FILE)
+    list(APPEND NB_STUBGEN_ARGS -p "${ARG_PATTERN_FILE}")
+  endif()
+
+  if (ARG_MARKER_FILE)
+    list(APPEND NB_STUBGEN_ARGS -M "${ARG_MARKER_FILE}")
+    list(APPEND NB_STUBGEN_OUTPUTS "${ARG_MARKER_FILE}")
+  endif()
+
+  if (NOT ARG_MODULE)
+    message(FATAL_ERROR "nanobind_add_stub(): a 'MODULE' argument must be specified!")
+  else()
+    list(APPEND NB_STUBGEN_ARGS -m "${ARG_MODULE}")
+  endif()
+
+  if (NOT ARG_OUTPUT)
+    message(FATAL_ERROR "nanobind_add_stub(): an 'OUTPUT' argument must be specified!")
+  else()
+    list(APPEND NB_STUBGEN_ARGS -o "${ARG_OUTPUT}")
+    list(APPEND NB_STUBGEN_OUTPUTS "${ARG_OUTPUT}")
+  endif()
+
+  set(NB_STUBGEN_CMD "${Python_EXECUTABLE}" "${NB_STUBGEN}" ${NB_STUBGEN_ARGS})
+
+  if (NOT ARG_INSTALL_TIME)
+    add_custom_command(
+      OUTPUT ${NB_STUBGEN_OUTPUTS}
+      COMMAND ${NB_STUBGEN_CMD}
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+      DEPENDS ${ARG_DEPENDS} "${NB_STUBGEN}" "${ARG_PATTERN_FILE}"
+      ${NB_STUBGEN_EXTRA}
+    )
+    add_custom_target(${name} ALL DEPENDS ${NB_STUBGEN_OUTPUTS})
+  else()
+    set(NB_STUBGEN_EXTRA "")
+    if (ARG_COMPONENT)
+      list(APPEND NB_STUBGEN_EXTRA COMPONENT ${ARG_COMPONENT})
+    endif()
+    if (ARG_EXCLUDE_FROM_ALL)
+      list(APPEND NB_STUBGEN_EXTRA EXCLUDE_FROM_ALL)
+    endif()
+    # \${CMAKE_INSTALL_PREFIX} has same effect as $<INSTALL_PREFIX>
+    # This is for compatibility with CMake < 3.27.
+    # For more info: https://github.com/wjakob/nanobind/issues/420#issuecomment-1971353531
+    install(CODE "set(CMD \"${NB_STUBGEN_CMD}\")\nexecute_process(\n COMMAND \$\{CMD\}\n WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}\"\n)" ${NB_STUBGEN_EXTRA})
+  endif()
 endfunction()

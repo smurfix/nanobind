@@ -13,6 +13,7 @@
 #include <nanobind/stl/set.h>
 #include <nanobind/stl/filesystem.h>
 #include <nanobind/stl/complex.h>
+#include <nanobind/stl/wstring.h>
 
 NB_MAKE_OPAQUE(std::vector<float, std::allocator<float>>)
 
@@ -251,7 +252,7 @@ NB_MODULE(test_stl_ext, m) {
     nb::class_<FuncWrapper>(m, "FuncWrapper", nb::type_slots(slots))
         .def(nb::init<>())
         .def_rw("f", &FuncWrapper::f)
-        .def_ro_static("alive", &FuncWrapper::alive);
+        .def_ro_static("alive", &FuncWrapper::alive, "static read-only property");
 
     // ----- test35 ------
     m.def("identity_string", [](std::string& x) { return x; });
@@ -270,7 +271,7 @@ NB_MODULE(test_stl_ext, m) {
 
     // ----- test43-test50 ------
     m.def("variant_copyable", [](std::variant<Copyable, int> &) {});
-    m.def("variant_copyable_none", [](std::variant<int, Copyable, std::monostate> &) {}, nb::arg("x").none());
+    m.def("variant_copyable_none", [](std::variant<std::monostate, int, Copyable> &) {}, nb::arg("x").none());
     m.def("variant_copyable_ptr", [](std::variant<Copyable *, int> &) {});
     m.def("variant_copyable_ptr_none", [](std::variant<Copyable *, int> &) {}, nb::arg("x").none());
     m.def("variant_ret_var_copyable", []() { return std::variant<Copyable, int>(); });
@@ -459,4 +460,12 @@ NB_MODULE(test_stl_ext, m) {
     m.def("vector_str", [](std::string& x){
         return x;
     });
+
+    m.def("pass_wstr", [](std::wstring ws) { return ws; });
+
+    // uncomment to see compiler error:
+    // m.def("optional_intptr", [](std::optional<int*>) {});
+    m.def("optional_cstr", [](std::optional<const char*> arg) {
+        return arg.value_or("none");
+    }, nb::arg().none());
 }

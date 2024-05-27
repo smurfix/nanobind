@@ -21,7 +21,7 @@ struct name {
 
 struct arg_v;
 struct arg {
-    NB_INLINE constexpr explicit arg(const char *name = nullptr) : name(name) {}
+    NB_INLINE constexpr explicit arg(const char *name = nullptr) : name_(name), signature_(nullptr) { }
     template <typename T> NB_INLINE arg_v operator=(T &&value) const;
     NB_INLINE arg &noconvert(bool value = true) {
         convert_ = !value;
@@ -32,7 +32,12 @@ struct arg {
         return *this;
     }
 
-    const char *name;
+    NB_INLINE arg &sig(const char *value) {
+        signature_ = value;
+        return *this;
+    }
+
+    const char *name_, *signature_;
     uint8_t convert_{ true };
     bool none_{ false };
 };
@@ -54,6 +59,8 @@ struct is_implicit {};
 struct is_operator {};
 struct is_arithmetic {};
 struct is_final {};
+struct is_generic {};
+struct kw_only {};
 
 template <size_t /* Nurse */, size_t /* Patient */> struct keep_alive {};
 template <typename T> struct supplement {};
@@ -75,9 +82,9 @@ struct type_slots_callback {
     cb_t callback;
 };
 
-struct raw_doc {
+struct sig {
     const char *value;
-    raw_doc(const char *doc) : value(doc) {}
+    sig(const char *value) : value(value) { }
 };
 
 struct is_getter { };
@@ -115,14 +122,15 @@ enum class func_flags : uint32_t {
     has_free = (1 << 14),
     /// Should the func_new() call return a new reference?
     return_ref = (1 << 15),
-    /// Does this overload specify a raw docstring that should take precedence?
-    raw_doc = (1 << 16),
+    /// Does this overload specify a custom function signature (for docstrings, typing)
+    has_signature = (1 << 16),
     /// Does this function have one or more nb::keep_alive() annotations?
     has_keep_alive = (1 << 17)
 };
 
 struct arg_data {
     const char *name;
+    const char *signature;
     PyObject *name_py;
     PyObject *value;
     bool convert;
@@ -149,8 +157,20 @@ template <size_t Size> struct func_data_prelim {
     /// Supplementary flags
     uint32_t flags;
 
-    /// Total number of function call arguments
-    uint32_t nargs;
+    /// Total number of parameters accepted by the C++ function; nb::args
+    /// and nb::kwargs parameters are counted as one each. If the
+    /// 'has_args' flag is set, then there is one arg_data structure
+    /// for each of these.
+    uint16_t nargs;
+
+    /// Number of paramters to the C++ function that may be filled from
+    /// Python positional arguments without additional ceremony. nb::args and
+    /// nb::kwargs parameters are not counted in this total, nor are any
+    /// parameters after nb::args or after a nb::kw_only annotation.
+    /// The parameters counted here may be either named (nb::arg("name"))
+    /// or unnamed (nb::arg()). If unnamed, they are effectively positional-only.
+    /// nargs_pos is always <= nargs.
+    uint16_t nargs_pos;
 
     // ------- Extra fields -------
 
@@ -206,9 +226,9 @@ NB_INLINE void func_extra_apply(F &f, const scope &scope, size_t &) {
 }
 
 template <typename F>
-NB_INLINE void func_extra_apply(F &f, const raw_doc &d, size_t &) {
-    f.flags |= (uint32_t) func_flags::has_doc | (uint32_t) func_flags::raw_doc;
-    f.doc = d.value;
+NB_INLINE void func_extra_apply(F &f, const sig &s, size_t &) {
+    f.flags |= (uint32_t) func_flags::has_signature;
+    f.name = s.value;
 }
 
 template <typename F>
@@ -241,9 +261,13 @@ NB_INLINE void func_extra_apply(F &f, rv_policy pol, size_t &) {
 }
 
 template <typename F>
+NB_INLINE void func_extra_apply(F &, std::nullptr_t, size_t &) { }
+
+template <typename F>
 NB_INLINE void func_extra_apply(F &f, const arg &a, size_t &index) {
     arg_data &arg = f.args[index++];
-    arg.name = a.name;
+    arg.name = a.name_;
+    arg.signature = a.signature_;
     arg.value = nullptr;
     arg.convert = a.convert_;
     arg.none = a.none_;
@@ -252,11 +276,15 @@ NB_INLINE void func_extra_apply(F &f, const arg &a, size_t &index) {
 template <typename F>
 NB_INLINE void func_extra_apply(F &f, const arg_v &a, size_t &index) {
     arg_data &arg = f.args[index++];
-    arg.name = a.name;
+    arg.name = a.name_;
+    arg.signature = a.signature_;
     arg.value = a.value.ptr();
     arg.convert = a.convert_;
     arg.none = a.none_;
 }
+
+template <typename F>
+NB_INLINE void func_extra_apply(F &, kw_only, size_t &) {}
 
 template <typename F, typename... Ts>
 NB_INLINE void func_extra_apply(F &, call_guard<Ts...>, size_t &) {}

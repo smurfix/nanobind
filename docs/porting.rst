@@ -284,9 +284,9 @@ changes are needed:
 
 Note that the cleanup list is only available when ``from_python()`` or
 ``from_cpp()`` are called as part of function dispatch, while usage by
-:cpp:func:`nb::cast() <cast>` sets ``cleanup`` to ``nullptr``. This case should
-be handled gracefully by refusing the conversion if the cleanup list is
-absolutely required.
+:cpp:func:`nb::cast() <cast>` may set ``cleanup`` to ``nullptr`` if implicit
+conversions are not enabled. This case should be handled gracefully by refusing
+the conversion if the cleanup list is absolutely required.
 
 Type casters may not raise C++ exceptions. Both ``from_python()`` and
 ``from_cpp()`` must be annotated with ``noexcept``. Exceptions or failure
@@ -334,8 +334,10 @@ Removed features include:
   executable or run several independent Python interpreters in the same process
   is unsupported. Nanobind caters to bindings only. Multi-interpreter support
   would require TLS lookups for nanobind data structures, which is undesirable.
-- ○ **Function binding annotations**: the ``kw_only`` / ``pos_only`` argument
-  annotations were removed.
+- ○ **Function binding annotations**: The ``pos_only`` argument
+  annotation was removed. However, the same behavior can be achieved by
+  creating unnamed arguments; see the discussion in the section on
+  :ref:`keyword-only arguments <kw_only>`.
 - ○ **Metaclasses**: creating types with custom metaclasses is unsupported.
 - ○ **Module-local bindings**: support was removed (both for types and exceptions).
 - ○ **Custom allocation**: C++ classes with an overloaded or deleted ``operator
