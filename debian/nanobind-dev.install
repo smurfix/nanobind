@@ -1,3 +1,4 @@
 usr/share/nanobind/cmake
 usr/share/nanobind/include
 usr/share/nanobind/src
+usr/share/nanobind/stubgen.py
