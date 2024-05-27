@@ -18,7 +18,7 @@ Build-Depends:
  python3-setuptools,
  robin-map-dev <!nocheck>,
 Homepage: https://github.com/wjakob/nanobind
-Standards-Version: 4.6.2
+Standards-Version: 4.7.0
 Rules-Requires-Root: no
 Vcs-Git: https://salsa.debian.org/python-team/packages/nanobind.git
 Vcs-Browser: https://salsa.debian.org/python-team/packages/nanobind
