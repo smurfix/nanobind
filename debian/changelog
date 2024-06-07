@@ -1,3 +1,9 @@
+nanobind (2.0.0-2) unstable; urgency=medium
+
+  * Add Breaks to help fenics-basix and fenics-dolfinx migrate
+
+ -- Timo Röhling <roehling@debian.org>  Fri, 07 Jun 2024 09:45:04 +0200
+
 nanobind (2.0.0-1) unstable; urgency=medium
 
   * New upstream version 2.0.0
