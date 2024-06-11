@@ -1,3 +1,10 @@
+nanobind (2.0.0-3) unstable; urgency=medium
+
+  * Tighten versioned dependencies
+  * Create .dist-info instead of .egg-info
+
+ -- Timo Röhling <roehling@debian.org>  Tue, 11 Jun 2024 16:17:58 +0200
+
 nanobind (2.0.0-2) unstable; urgency=medium
 
   * Add Breaks to help fenics-basix and fenics-dolfinx migrate
