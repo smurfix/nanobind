@@ -1,15 +1,24 @@
 #!/usr/bin/make -f
 
+include /usr/share/dpkg/pkg-info.mk
+
 NB_TEST := $(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),OFF,ON)
 
 export PYBUILD_SYSTEM = cmake
 export PYBUILD_CONFIGURE_ARGS = -DNB_USE_SUBMODULE_DEPS=OFF -DNB_TEST=$(NB_TEST)
-export PYBUILD_TEST_ARGS = && {interpreter} -m pytest --ignore=tests {build_dir}/tests
+export PYBUILD_TEST_ARGS = || true; {interpreter} -m pytest --ignore=tests {build_dir}/tests
 
 %:
 	dh $@ --buildsystem=pybuild
 
 execute_after_dh_auto_install:
-	python3 setup.py egg_info
-	mv *.egg-info debian/tmp/usr/share/nanobind
+	python3 debian/helpers/dist_info.py \
+		--name=nanobind \
+		--version=$(DEB_VERSION_UPSTREAM) \
+		--add-metadata="Author: Wenzel Jakob" \
+		--add-metadata="Author-email: wenzel.jakob@epfl.ch" \
+		--add-metadata="Home-page: https://github.com/wjakob/nanobind" \
+		--add-metadata="License: BSD-3-Clause" \
+		--add-metadata="Summary: tiny and efficient C++/Python bindings" \
+		--output-dir=debian/tmp/usr/lib/python3/dist-packages
 

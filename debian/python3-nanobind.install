@@ -1,4 +1,4 @@
 usr/share/nanobind/*.py	usr/lib/python3/dist-packages/nanobind
-usr/share/nanobind/*.egg-info usr/lib/python3/dist-packages
+usr/lib/python3*
 
 
