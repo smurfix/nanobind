@@ -7,7 +7,7 @@ Subject: Hardcode path to nanobind installation
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/__init__.py b/src/__init__.py
-index 76539c3..fe16ec9 100644
+index 0d2a481..e9fe9dd 100644
 --- a/src/__init__.py
 +++ b/src/__init__.py
 @@ -6,11 +6,11 @@ if sys.version_info < (3, 8):
@@ -22,5 +22,5 @@ index 76539c3..fe16ec9 100644
 -    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "cmake")
 +    return "/usr/share/nanobind/cmake"
  
- __version__ = "2.0.0"
+ __version__ = "2.1.0"
  
