@@ -1,3 +1,13 @@
+nanobind (2.1.0-1) unstable; urgency=medium
+
+  * New upstream version 2.1.0
+  * Update patches
+    - Drop 0002-Fix-ndarray-stub-reference.patch (obsolete)
+  * Override NB_INSTALL_DATADIR to restore old behavior
+  * Skip broken stub reference test
+
+ -- Timo Röhling <roehling@debian.org>  Sat, 31 Aug 2024 00:42:36 +0200
+
 nanobind (2.0.0-3) unstable; urgency=medium
 
   * Tighten versioned dependencies
