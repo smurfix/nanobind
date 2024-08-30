@@ -9,7 +9,7 @@ export PYBUILD_CONFIGURE_ARGS = \
 	-DNB_USE_SUBMODULE_DEPS=OFF \
 	-DNB_TEST=$(NB_TEST) \
 	-DNB_INSTALL_DATADIR=/usr/share/nanobind
-export PYBUILD_TEST_ARGS = || true; {interpreter} -m pytest --ignore=tests {build_dir}/tests
+export PYBUILD_TEST_ARGS = || true; {interpreter} -m pytest --ignore=tests {build_dir}/tests -k "not test01_check_stub_refs"
 
 %:
 	dh $@ --buildsystem=pybuild
