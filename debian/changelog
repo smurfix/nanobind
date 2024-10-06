@@ -1,3 +1,12 @@
+nanobind (2.2.0-1) unstable; urgency=medium
+
+  * Update d/watch to latest GitHub recipe
+  * New upstream version 2.2.0
+  * Wrap and sort Debian package files
+  * Refresh patch (no functional changes)
+
+ -- Timo Röhling <roehling@debian.org>  Sun, 06 Oct 2024 23:27:38 +0200
+
 nanobind (2.1.0-1) unstable; urgency=medium
 
   * New upstream version 2.1.0
