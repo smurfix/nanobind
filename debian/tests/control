@@ -1,4 +1,5 @@
-Tests: run-test-suite
+Tests:
+ run-test-suite,
 Depends:
  cmake,
  g++ | c++-compiler,
@@ -9,5 +10,5 @@ Depends:
  python3-numpy,
  python3-pytest,
  python3-scipy,
-Restrictions: allow-stderr
-
+Restrictions:
+ allow-stderr,

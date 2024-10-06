@@ -3,12 +3,12 @@ Section: python
 Priority: optional
 Maintainer: Debian Python Team <team+python@tracker.debian.org>
 Uploaders:
- Timo Röhling <roehling@debian.org>
+ Timo Röhling <roehling@debian.org>,
 Build-Depends:
- debhelper-compat (= 13),
- dh-sequence-python3,
  cmake,
+ debhelper-compat (= 13),
  dh-python,
+ dh-sequence-python3,
  libeigen3-dev <!nocheck>,
  libpython3-all-dev,
  python3-all-dev:any,
@@ -33,9 +33,9 @@ Package: nanobind-dev
 Architecture: all
 Multi-Arch: foreign
 Depends:
- ${misc:Depends},
  libeigen3-dev,
  robin-map-dev,
+ ${misc:Depends},
 Description: ${source:Synopsis} (development files)
  ${source:Extended-Description}
  .
@@ -44,11 +44,10 @@ Description: ${source:Synopsis} (development files)
 Package: python3-nanobind
 Architecture: all
 Depends:
+ nanobind-dev (= ${binary:Version}),
  ${misc:Depends},
  ${python3:Depends},
- nanobind-dev (= ${binary:Version}),
 Description: ${source:Synopsis} (Python 3 module)
  ${source:Extended-Description}
  .
  This package installs the Python 3 module.
-
