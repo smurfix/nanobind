@@ -1,3 +1,4 @@
+debian/versions usr/share/nanobind/
 usr/share/nanobind/cmake
 usr/share/nanobind/include
 usr/share/nanobind/src

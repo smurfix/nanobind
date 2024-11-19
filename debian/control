@@ -47,6 +47,8 @@ Depends:
  nanobind-dev (= ${binary:Version}),
  ${misc:Depends},
  ${python3:Depends},
+Provides:
+ ${nanobind:Provides},
 Description: ${source:Synopsis} (Python 3 module)
  ${source:Extended-Description}
  .

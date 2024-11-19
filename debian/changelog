@@ -1,3 +1,9 @@
+nanobind (2.2.0-2) UNRELEASED; urgency=medium
+
+  * Expose ABI version for reverse dependenies (Closes: #1085019)
+
+ -- Timo Röhling <roehling@debian.org>  Tue, 19 Nov 2024 12:30:02 +0100
+
 nanobind (2.2.0-1) unstable; urgency=medium
 
   * Update d/watch to latest GitHub recipe

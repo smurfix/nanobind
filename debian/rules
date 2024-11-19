@@ -25,3 +25,6 @@ execute_after_dh_auto_install:
 		--add-metadata="Summary: tiny and efficient C++/Python bindings" \
 		--output-dir=debian/tmp/usr/lib/python3/dist-packages
 
+execute_before_dh_python3:
+	python3 debian/helpers/nanobind_provides.py
+
