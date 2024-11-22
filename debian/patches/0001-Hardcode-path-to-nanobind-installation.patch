@@ -2,6 +2,7 @@ From: =?utf-8?q?Timo_R=C3=B6hling?= <roehling@debian.org>
 Date: Sat, 6 Apr 2024 01:20:15 +0200
 Subject: Hardcode path to nanobind installation
 
+Forwarded: not-needed
 ---
  src/__init__.py | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
