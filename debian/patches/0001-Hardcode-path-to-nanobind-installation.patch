@@ -8,7 +8,7 @@ Forwarded: not-needed
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/__init__.py b/src/__init__.py
-index 5933c5e..2a377b2 100644
+index 3f8ad89..7e2adfb 100644
 --- a/src/__init__.py
 +++ b/src/__init__.py
 @@ -6,11 +6,11 @@ if sys.version_info < (3, 8):
@@ -23,5 +23,5 @@ index 5933c5e..2a377b2 100644
 -    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "cmake")
 +    return "/usr/share/nanobind/cmake"
  
- __version__ = "2.2.0"
+ __version__ = "2.4.0"
  
