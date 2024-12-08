@@ -464,6 +464,10 @@ NB_MODULE(test_stl_ext, m) {
         return x;
     });
 
+    m.def("vector_optional_str", [](const std::vector<std::optional<std::string>>& x) {
+        return x;
+    });
+
     m.def("pass_wstr", [](std::wstring ws) { return ws; });
 
     // uncomment to see compiler error:
@@ -471,4 +475,35 @@ NB_MODULE(test_stl_ext, m) {
     m.def("optional_cstr", [](std::optional<const char*> arg) {
         return arg.value_or("none");
     }, nb::arg().none());
+
+
+    // test74
+    struct BasicID1 {
+        uint64_t id;
+        BasicID1(uint64_t id) : id(id) {}
+    };
+
+    struct BasicID2 {
+        uint64_t id;
+        BasicID2(uint64_t id) : id(id) {}
+    };
+
+    nb::class_<BasicID1>(m, "BasicID1")
+        .def(nb::init<uint64_t>())
+        .def("__int__", [](const BasicID1& x) { return x.id; })
+        ;
+
+    nb::class_<BasicID2>(m, "BasicID2")
+        .def(nb::init_implicit<uint64_t>());
+
+    using IDVariants = std::variant<std::monostate, BasicID2, BasicID1>;
+
+    struct IDHavingEvent {
+        IDVariants id;
+        IDHavingEvent() = default;
+    };
+
+    nb::class_<IDHavingEvent>(m, "IDHavingEvent")
+        .def(nb::init<>())
+        .def_rw("id", &IDHavingEvent::id);
 }

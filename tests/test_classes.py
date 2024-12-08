@@ -325,7 +325,9 @@ def test14_operators():
         assert repr(a - b) == "3"
     assert "unsupported operand type" in str(excinfo.value)
     assert repr(a - 2) == "-1"
+    a_before = id(a)
     a += b
+    assert id(a) == a_before
     assert repr(a) == "3"
     assert repr(b) == "2"
 
@@ -888,6 +890,33 @@ def test46_custom_new():
     with pytest.raises(RuntimeError):
         t.UniqueInt.__new__(int)
 
+    # Make sure we do allow no-args construction for types that declare
+    # such a __new__
+    t.NewNone()
+    assert t.NewDflt().value == 42
+    assert t.NewDflt(10).value == 10
+    assert t.NewStar().value == 42
+    assert t.NewStar("hi").value == 43
+    assert t.NewStar(value=10).value == 10
+    assert t.NewStar("hi", "lo", value=10).value == 12
+    assert t.NewStar(value=10, other="blah").value == 20
+
 def test47_inconstructible():
     with pytest.raises(TypeError, match="no constructor defined"):
         t.Foo()
+
+def test48_monekypatchable():
+    # issue 750: how to monkeypatch __init__
+    q = t.MonkeyPatchable()
+    assert q.value == 123
+
+    def my_init(self):
+        t.MonkeyPatchable.custom_init(self)
+
+    t.MonkeyPatchable.__init__ = my_init
+    q = t.MonkeyPatchable()
+    assert q.value == 456
+
+def test49_static_property_override():
+    assert t.StaticPropertyOverride.x == 42
+    assert t.StaticPropertyOverride2.x == 43
