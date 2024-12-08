@@ -1,3 +1,10 @@
+nanobind (2.4.0-1) unstable; urgency=medium
+
+  * New upstream version 2.4.0
+  * Refresh patches (no functional changes)
+
+ -- Timo Röhling <roehling@debian.org>  Sun, 08 Dec 2024 22:14:54 +0100
+
 nanobind (2.2.0-2) unstable; urgency=medium
 
   * Expose ABI version for reverse dependenies (Closes: #1085019)
