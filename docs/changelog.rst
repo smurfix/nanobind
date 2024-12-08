@@ -15,7 +15,58 @@ case, both modules must use the same nanobind ABI version, or they will be
 isolated from each other. Releases that don't explicitly mention an ABI version
 below inherit that of the preceding release.
 
-Version 2.2.0 (October 3, 2014)
+Version 2.3.0 (Dec 6, 2024)
+---------------------------
+
+- Added a function annotation :cpp:class:`nb::call_policy\<Policy\>()
+  <call_policy>` which supports custom function wrapping logic,
+  calling ``Policy::precall()`` before the bound function and
+  ``Policy::postcall()`` after. This is a low-level interface intended
+  for advanced users. The precall and postcall hooks are able to
+  observe the Python objects forming the function arguments and return
+  value, and the precall hook can change the arguments.  See the linked
+  documentation for more details, important caveats, and an example policy.
+  (PR `#767 <https://github.com/wjakob/nanobind/pull/767>`__)
+
+- :cpp:func:`nb::make_iterator <make_iterator>` now accepts its iterator
+  arguments by value, rather than by forwarding reference, in order to
+  eliminate the hazard of storing a dangling C++ iterator reference in the
+  returned Python iterator object. (PR `#788
+  <https://github.com/wjakob/nanobind/pull/788>`__)
+
+- The ``std::variant`` type_caster now does two passes when converting from Python.
+  The first pass is done without implicit conversions. This fixes an issue where
+  ``std::variant<U, T>`` might cast a Python object wrapping a ``T`` to a ``U`` if
+  there is an implicit conversion available from ``T`` to ``U``.
+  (issue `#769 <https://github.com/wjakob/nanobind/issues/769>`__)
+
+- Restored support for constructing types with an overloaded ``__new__`` that
+  takes no arguments, which regressed with the constructor vector call
+  acceleration that was added in nanobind 2.2.0.
+  (issue `#786 <https://github.com/wjakob/nanobind/issues/786>`__)
+
+- Bindings for augmented assignment operators (as generated, for example, by
+  ``.def(nb::self += nb::self)``) now return the same object in Python in the
+  typical case where the C++ operator returns a reference to ``*this``.
+  Previously, after ``a += b``, ``a`` would be replaced with a copy.
+  (PR `#803 <https://github.com/wjakob/nanobind/pull/803>`__)
+
+- Added an overload to :cpp:func:`nb::isinstance <isinstance>` which tests if a
+  Python object is an instance of a Python class. This is in addition to the
+  existing overload, which tests if a Python object is an instance of a bound
+  C++ class. (PR `#805 <https://github.com/wjakob/nanobind/pull/805>`__).
+
+- Added support for overriding static properties, such as those defined using
+  ``def_prop_ro_static``, in subclasses. Previously this would fail with an
+  error. (PR `#806 <https://github.com/wjakob/nanobind/pull/806>`__).
+
+- Other minor fixes and improvements. (PRs `#771
+  <https://github.com/wjakob/nanobind/pull/771>`__, `#772
+  <https://github.com/wjakob/nanobind/pull/772>`__, `#748
+  <https://github.com/wjakob/nanobind/pull/748>`__, and `#753
+  <https://github.com/wjakob/nanobind/pull/753>`__)
+
+Version 2.2.0 (October 3, 2024)
 -------------------------------
 
 - nanobind can now target `free-threaded Python
@@ -24,7 +75,7 @@ Version 2.2.0 (October 3, 2014)
   <https://en.wikipedia.org/wiki/Global_interpreter_lock>`__ with a
   fine-grained locking scheme (see `PEP 703
   <https://peps.python.org/pep-0703/>`__) to better leverage multi-core
-  parallelism. A `separate documation page <free-threading>`__ explains this in
+  parallelism. A :ref:`separate documentation page <free-threaded>` explains this in
   detail (PRs `#695 <https://github.com/wjakob/nanobind/pull/695>`__, `#720
   <https://github.com/wjakob/nanobind/pull/720>`__)
 

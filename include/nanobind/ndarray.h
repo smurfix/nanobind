@@ -137,9 +137,9 @@ template <> struct dtype_traits<void> {
     static constexpr auto name = descr<0>();
 };
 
-template <> struct dtype_traits<const void> {
-    static constexpr dlpack::dtype value{ 0, 0, 0 };
-    static constexpr auto name = descr<0>();
+template <typename T> struct dtype_traits<const T> {
+    static constexpr dlpack::dtype value = dtype_traits<T>::value;
+    static constexpr auto name = dtype_traits<T>::name;
 };
 
 template <ssize_t... Is> struct shape {
@@ -543,7 +543,7 @@ template <typename... Args> struct type_caster<ndarray<Args...>> {
                    const_name("]"))
 
     bool from_python(handle src, uint8_t flags, cleanup_list *cleanup) noexcept {
-        if (src.is_none()) {
+        if (src.is_none() && flags & (uint8_t) cast_flags::accepts_none) {
             value = ndarray<Args...>();
             return true;
         }

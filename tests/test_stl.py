@@ -782,6 +782,7 @@ def test69_complex_array():
 def test70_vec_char():
     assert isinstance(t.vector_str("123"), str)
     assert isinstance(t.vector_str(["123", "345"]), list)
+    assert t.vector_optional_str(["abc", None]) == ["abc", None]
 
 
 def test71_null_input():
@@ -793,3 +794,13 @@ def test71_null_input():
 @skip_on_pypy # PyPy fails this test on Windows :-(
 def test72_wstr():
     assert t.pass_wstr('🎈') == '🎈'
+
+def test73_bad_input_to_set():
+    with pytest.raises(TypeError):
+        t.set_in_value(None)
+
+def test74_variant_implicit_conversions():
+    event = t.IDHavingEvent()
+    assert event.id is None
+    event.id = t.BasicID1(78)
+    assert type(event.id) is t.BasicID1
