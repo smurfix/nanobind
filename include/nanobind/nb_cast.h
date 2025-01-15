@@ -466,7 +466,7 @@ template <typename Type_> struct type_caster_base : type_caster_base_tag {
         if constexpr (is_pointer_v<T>)
             ptr = (Type *) value;
         else
-            ptr = (Type *) &value;
+            ptr = const_cast<Type *>((const Type *) &value);
 
         policy = infer_policy<T>(policy);
         const std::type_info *type = &typeid(Type);
