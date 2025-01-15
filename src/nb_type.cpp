@@ -823,8 +823,6 @@ static PyObject *nb_type_from_metaclass(PyTypeObject *meta, PyObject *mod,
 #endif
 }
 
-extern int nb_type_setattro(PyObject* obj, PyObject* name, PyObject* value);
-
 static PyTypeObject *nb_type_tp(size_t supplement) noexcept {
     object key = steal(PyLong_FromSize_t(supplement));
     nb_internals *internals_ = internals;
