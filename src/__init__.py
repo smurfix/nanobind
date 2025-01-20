@@ -6,11 +6,11 @@ if sys.version_info < (3, 8):
 
 def include_dir() -> str:
     "Return the path to the nanobind include directory"
-    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "include")
+    return "/usr/share/nanobind/include"
 
 def cmake_dir() -> str:
     "Return the path to the nanobind CMake module directory."
-    return os.path.join(os.path.abspath(os.path.dirname(__file__)), "cmake")
+    return "/usr/share/nanobind/cmake"
 
 __version__ = "2.4.0"
 
