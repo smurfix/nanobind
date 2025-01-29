@@ -379,7 +379,7 @@ Stable ABI extensions are convenient because they can be reused across Python
 versions, but this unfortunately only works on Python 3.12 and newer. Nanobind
 crucially depends on several `features
 <https://docs.python.org/3/whatsnew/3.12.html#c-api-changes>`__ that were added
-in version 3.12 (specifically, `PyType_FromMetaclass()`` and limited API
+in version 3.12 (specifically, ``PyType_FromMetaclass()`` and limited API
 bindings of the vector call protocol).
 
 Policy on Clang-Tidy, ``-Wpedantic``, etc.
@@ -399,10 +399,11 @@ purification" category: things that cause churn, decrease readability, and
 which don't fix actual problems. It's a never-ending cycle because each new
 revision of such tooling adds further warnings and purification rites.
 
-So just to be clear: I do not wish to pepper this codebase with ``const_cast``
-and ``#pragmas`` or pragma-like comments to avoid warnings in various kinds of
-external tooling just so those users can have a "silent" build. I don't think
-it is reasonable for them to impose their own style on this project.
+So just to have a clear policy: I do not wish to pepper this codebase with
+``const_cast`` and ``#pragmas`` or pragma-like comments to avoid warnings in
+various kinds of external tooling just so those users can have a "silent"
+build. I don't think it is reasonable for them to impose their own style on
+this project.
 
 As a workaround it is likely possible to restrict the scope of style checks to
 particular C++ namespaces or source code locations.

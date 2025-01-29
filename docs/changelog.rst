@@ -56,6 +56,23 @@ Version TBD (not yet released)
   <https://github.com/wjakob/nanobind/pull/847>`__, commit `b95eb7
   <https://github.com/wjakob/nanobind/commit/b95eb755b5a651a40562002be9ca8a4c6bf0acb9>`__).
 
+- It is now possible to create Python subclasses of C++ classes that
+  define their constructor bindings using :cpp:struct:`nb::new_() <new_>`.
+  Previously, attempting to instantiate such a Python subclass would instead
+  produce an instance of the base C++ type. Note that it is still not possible
+  to override virtual methods in such a Python subclass, because the object
+  returned by the :cpp:struct:`new_() <new_>` constructor will generally
+  not be an instance of the alias/trampoline type.
+  (PR `#859 <https://github.com/wjakob/nanobind/pull/859>`__)
+
+- Added :cpp:class:`nb::def_visitor\<..\> <def_visitor>`, which can be used to
+  define your own binding logic that operates on a :cpp:class:`nb::class_\<..\>
+  <class_>` when an instance of the visitor object is passed to
+  :cpp:func:`class_::def()`. This generalizes the mechanism used by
+  :cpp:class:`init`, :cpp:class:`new_`, etc, so that you can create
+  binding abstractions that "feel like" the built-in ones.
+  (PR `#884 <https://github.com/wjakob/nanobind/pull/884>`__)
+
 Version 2.4.0 (Dec 6, 2024)
 ---------------------------
 
