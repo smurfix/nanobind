@@ -664,7 +664,7 @@ ndarray_handle *ndarray_create(void *value, size_t ndim, const size_t *shape_in,
     scoped_pymalloc<int64_t> shape(ndim), strides(ndim);
 
     auto deleter = [](managed_dltensor *mt) {
-        if (! is_alive())
+        if (!is_alive())
             return;
         gil_scoped_acquire guard;
         ndarray_handle *th = (ndarray_handle *) mt->manager_ctx;
