@@ -15,8 +15,16 @@ case, both modules must use the same nanobind ABI version, or they will be
 isolated from each other. Releases that don't explicitly mention an ABI version
 below inherit that of the preceding release.
 
-Version TBD (not yet released)
-------------------------------
+Version 2.5.0 (Feb 2, 2025)
+---------------------------
+
+- Added :cpp:class:`nb::def_visitor\<..\> <def_visitor>`, which can be used to
+  define your own binding logic that operates on a :cpp:class:`nb::class_\<..\>
+  <class_>` when an instance of the visitor object is passed to
+  :cpp:func:`class_::def()`. This generalizes the mechanism used by
+  :cpp:class:`init`, :cpp:class:`new_`, etc, so that you can create binding
+  abstractions that "feel like" the built-in ones. (PR `#884
+  <https://github.com/wjakob/nanobind/pull/884>`__)
 
 - Added some special forms for :cpp:class:`nb::typed\<T, Ts...\> <typed>`
   (PR `#835 <https://github.com/wjakob/nanobind/pull/835>`__):
@@ -29,26 +37,38 @@ Version TBD (not yet released)
     ``Callable[[Args...], R]``; similarly, ``nb::typed<nb::callable, R(...)>``
     (with a literal ellipsis) produces the Python ``Callable[..., R]``.
 
+- It is now possible to create Python subclasses of C++ classes that define
+  their constructor bindings using :cpp:struct:`nb::new_() <new_>`. Previously,
+  attempting to instantiate such a Python subclass would instead produce an
+  instance of the base C++ type. Note that it is still not possible to override
+  virtual methods in such a Python subclass, because the object returned by the
+  :cpp:struct:`new_() <new_>` constructor will generally not be an instance of
+  the alias/trampoline type. (PR `#859
+  <https://github.com/wjakob/nanobind/pull/859>`__)
+
 - Fixed the :cpp:class:`nb::int_ <int_>` constructor so that it casts to
   an integer when invoked with a floating point argument.
+
+- Multi-level inheritance (e.g., `A → B → C`) previously did not work on Python
+  3.12+ when a base class (e.g., ``A``) provided a trampoline implementation.
+  This is now fixed. (commit `92d9cb
+  <https://github.com/wjakob/nanobind/commit/92d9cb3d62b743a9eca2d9d9d8e5fb14a1e00a2a>`__).
 
 - Fixed (benign) reference leads that could occur when ``std::shared_ptr<T>``
   instances were still alive at interpreter shutdown time. (commit `fb8157
   <https://github.com/wjakob/nanobind/commit/fb815762fdb8476cfd293e3717ca41c8bb890437>`__).
 
-- Fixed a race condition in free-threaded extensions that could occur when
-  :cpp:func:`nb::make_iterator <make_iterator>` was concurrently used by
-  multiple threads (PR `#832 <https://github.com/wjakob/nanobind/pull/832>`__).
-
-- Removed double-checked locking patterns in accesses to internal data
-  structures to ensure correct free-threaded behavior on architectures with
-  weak memory ordering such as ARM (PR `#819
-  <https://github.com/wjakob/nanobind/pull/819>`__).
-
 - The floating-point type caster now only performs value-changing narrowing
   conversions during the implicit conversion phase. They can be entirely
   avoided by passing the :cpp:func:`.noconvert() <arg::noconvert>` argument
   annotation (PR `#829 <https://github.com/wjakob/nanobind/pull/829>`__).
+
+- The ``std::complex`` type caster now only performs value-changing narrowing
+  conversions during the implicit conversion phase.  They can be entirely
+  avoided by passing the :cpp:func:`.noconvert() <arg::noconvert>` argument
+  annotation.  Also, during the implicit conversion phase, if the Python object
+  is not a complex number object but has a ``__complex__()`` method, it will be
+  called (PR `#854 <https://github.com/wjakob/nanobind/pull/854>`__).
 
 - Fixed an overly strict check that could cause a function taking an
   :cpp:class:`nb::ndarray\<...\> <ndarray>` to refuse specific types of
@@ -56,22 +76,23 @@ Version TBD (not yet released)
   <https://github.com/wjakob/nanobind/pull/847>`__, commit `b95eb7
   <https://github.com/wjakob/nanobind/commit/b95eb755b5a651a40562002be9ca8a4c6bf0acb9>`__).
 
-- It is now possible to create Python subclasses of C++ classes that
-  define their constructor bindings using :cpp:struct:`nb::new_() <new_>`.
-  Previously, attempting to instantiate such a Python subclass would instead
-  produce an instance of the base C++ type. Note that it is still not possible
-  to override virtual methods in such a Python subclass, because the object
-  returned by the :cpp:struct:`new_() <new_>` constructor will generally
-  not be an instance of the alias/trampoline type.
-  (PR `#859 <https://github.com/wjakob/nanobind/pull/859>`__)
+Fixes for free-threaded builds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Added :cpp:class:`nb::def_visitor\<..\> <def_visitor>`, which can be used to
-  define your own binding logic that operates on a :cpp:class:`nb::class_\<..\>
-  <class_>` when an instance of the visitor object is passed to
-  :cpp:func:`class_::def()`. This generalizes the mechanism used by
-  :cpp:class:`init`, :cpp:class:`new_`, etc, so that you can create
-  binding abstractions that "feel like" the built-in ones.
-  (PR `#884 <https://github.com/wjakob/nanobind/pull/884>`__)
+- Fixed a race condition in free-threaded extensions that could occur when
+  :cpp:func:`nb::make_iterator <make_iterator>` was concurrently used by
+  multiple threads (PR `#832 <https://github.com/wjakob/nanobind/pull/832>`__).
+
+- Fixed a race condition in free-threaded extensions that could occur when
+  multiple threads access the Python object associated with the same C++
+  instance, which does not exist yet and therefore must be created. (issue
+  `#867 <https://github.com/wjakob/nanobind/issues/867>`__, PR `#887
+  <https://github.com/wjakob/nanobind/pull/887>`__).
+
+- Removed double-checked locking patterns in accesses to internal data
+  structures to ensure correct free-threaded behavior on architectures with
+  weak memory ordering such as ARM (PR `#819
+  <https://github.com/wjakob/nanobind/pull/819>`__).
 
 - Added :cpp:func:`nb::is_alive() <is_alive>` checks to prevent destructors
   from trying to re-acquire the GIL when the interpreter shuts down,
