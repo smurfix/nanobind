@@ -102,7 +102,7 @@ bool intrusive_counter::dec_ref() const noexcept {
             if (v == 1) {
                 fprintf(stderr,
                         "intrusive_counter::dec_ref(%p): reference count "
-                        "underflow!", (void *) this);
+                        "underflow!", const_cast<void *>((const void *) this));
                 abort();
             }
 
